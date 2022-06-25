@@ -61,13 +61,13 @@ function getCalcNumber(e, curInput) {
 }
 
 function validateInput(evt) {
-  closeCalc()
   let theEvent = evt || window.event;
   let key = theEvent.keyCode || theEvent.which;
   if (key !== 46 && key < 49 || key > 57 && key < 97 || key > 105) {
     theEvent.returnValue = false;
     if (theEvent.preventDefault) theEvent.preventDefault();
   } else {
+    closeCalc()
     if (key === 46) {
       evt.target.removeAttribute('class', 'yellow')
       evt.target.value = ''
@@ -76,6 +76,7 @@ function validateInput(evt) {
     evt.target.value ? evt.target.value = '' : null
     evt.target.setAttribute('class', 'yellow')
   }
+
 }
 
 function startGame() {
