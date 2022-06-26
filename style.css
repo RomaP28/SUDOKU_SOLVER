@@ -91,7 +91,7 @@ button img {
 }
 
 
-.calculator {
+.tipBox {
   position: absolute;
   width: 100px;
   height: 100px;
@@ -118,7 +118,7 @@ button img {
 }
 
 
-.closeCalc {
+.closeTip {
   transform: translateY(-100%);
   animation: close 0.2s forwards;
 }
@@ -157,7 +157,7 @@ button img {
 }
 
 @media screen and (max-width: 599px) {
-  .calculator {
+  .tipBox {
     display: none;
   }
 }

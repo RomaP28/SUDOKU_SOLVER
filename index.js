@@ -5,13 +5,15 @@ const container = document.querySelector('.container')
 const size = 9
 const boxSize = 3
 
+// Add click listener to the document to check if the click wasn't in table or tipBox then don't respond
 document.addEventListener('mousedown', (e) => {
   const getClick = e.target.parentElement
-  if (getClick === field || getClick === document.querySelector('.calculator')) return
-  closeCalc()
+  if (getClick === field || getClick === document.querySelector('.tipBox')) return
   e.preventDefault();
+  closeTip()
 })
 
+//Show spinner when calculating
 btn.addEventListener('mousedown', () => {
   btn.innerHTML = `<img src='./832.svg' alt='img'>`
 })
@@ -19,6 +21,7 @@ btn.addEventListener('mousedown', () => {
 btn.addEventListener('click', startGame)
 reset.addEventListener('click', resetGame)
 
+// Creating cells and add them to the field dynamically
 function createField() {
   for (let i = 0; i < 81; i++) {
     field.innerHTML += `<input id=${i}
@@ -27,43 +30,44 @@ function createField() {
       maxlength="1"
       onmouseover="drawGrid(event)"
       onmouseout="drawGrid(event)"
-      onclick="openCalc(event)"
+      onclick="showTipsField(event)"
       onkeydown="validateInput(event)"
-      style='border-top:${i < 9 ? "1px solid black" : null};
+      style='
+      border-top:${i < 9 ? "1px solid black" : null};
       border-right:${(i + 1) % 3 === 0 ? "1px solid black" : null}; 
       border-bottom:${i >= 18 && i <= 26 || i >= 45 && i <= 53 || i >= 72 && i <= 80 ? "1px solid black" : null};
       border-left:${i % 9 === 0 ? "1px solid black" : null};'
-      ${i === 1 && 'autofocus'} 
+      ${i === 0 && 'autofocus'} 
       '>`
   }
 }
 
-
-
-function openCalc(e) {
-  document.querySelector('.calculator') && container.removeChild(document.querySelector('.calculator'))
+//Creatig tipBox with numbers
+function showTipsField(e) {
+  document.querySelector('.tipBox') && container.removeChild(document.querySelector('.tipBox'))
   const calculator = document.createElement('div')
-  container.appendChild(calculator)
-  calculator.classList.add('calculator')
+  calculator.classList.add('tipBox')
   calculator.style.top = e.y + 'px';
   calculator.style.left = e.x + 'px'
-  calculator.innerHTML = ''
   for (let i = 1; i < 10; i++) {
-    calculator.innerHTML += `<p class='numbers' onclick='getCalcNumber(event, ${e.target.id})'>${i}</p>`
+    calculator.innerHTML += `<p class='numbers' onclick='getNumberTip(event, ${e.target.id})'>${i}</p>`
   }
+  container.appendChild(calculator)
 }
 
-function closeCalc() {
-  document.querySelector('.calculator') && document.querySelector('.calculator').classList.add('closeCalc')
+function closeTip() {
+  document.querySelector('.tipBox') && document.querySelector('.tipBox').classList.add('closeTip')
 }
 
-function getCalcNumber(e, curInput) {
-  closeCalc()
+// Getting Number from tipBox and sending to current input
+function getNumberTip(e, curInput) {
+  closeTip()
   const elem = field.querySelectorAll('input')[curInput]
   elem.value = +e.target.textContent
-  elem.setAttribute('class', 'yellow')
+  elem.classList.add('yellow')
 }
 
+//Validating input from keyboard
 function validateInput(evt) {
   let theEvent = evt || window.event;
   let key = theEvent.keyCode || theEvent.which;
@@ -71,14 +75,14 @@ function validateInput(evt) {
     theEvent.returnValue = false;
     if (theEvent.preventDefault) theEvent.preventDefault();
   } else {
-    closeCalc()
+    closeTip()
     if (key === 46) {
-      evt.target.removeAttribute('class', 'yellow')
+      evt.target.classList.remove('yellow')
       evt.target.value = ''
       return
     }
     evt.target.value ? evt.target.value = '' : null
-    evt.target.setAttribute('class', 'yellow')
+    evt.target.classList.add('yellow')
   }
 }
 
@@ -144,7 +148,6 @@ createField()
 
 function drawGrid(e) {
   const inputs = getBoard()
-  const checks = [];
   const curPos = (board) => {
     for (let r = 0; r < size; r++) {
       for (let c = 0; c < size; c++) {
@@ -177,7 +180,8 @@ function drawGrid(e) {
   }
 }
 
-///////////////////////////////////////////////////////
+
+////////////////Algorythm ////////////////////////
 
 function sudoku(board) {
   const findEmpty = (board) => {
@@ -230,11 +234,11 @@ function sudoku(board) {
     if (currPos === null) {
       return true;
     }
-    //console.log('------------------------------');
+    // console.log('------------------------------');
     for (let i = 1; i < size + 1; i++) {
       const currNum = i;
       const isValid = validate(currNum, currPos, board);
-      console.log('currPos ', currPos, 'currNum ', currNum, 'board ', board);
+      // console.log('currPos ', currPos, 'currNum ', currNum, 'isValid ', isValid);
       if (isValid) {
         const [x, y] = currPos;
         board[x][y] = currNum;
@@ -253,7 +257,6 @@ function sudoku(board) {
   solve();
   return board;
 };
-// console.table(puzzle)
-// console.table(sudoku(puzzle))
+
 
 
