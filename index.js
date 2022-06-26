@@ -2,6 +2,8 @@ const field = document.querySelector('.gameField')
 const btn = document.getElementById('startGame')
 const reset = document.getElementById('reset')
 const container = document.querySelector('.container')
+const size = 9
+const boxSize = 3
 
 document.addEventListener('mousedown', (e) => {
   const getClick = e.target.parentElement
@@ -20,11 +22,13 @@ reset.addEventListener('click', resetGame)
 function createField() {
   for (let i = 0; i < 81; i++) {
     field.innerHTML += `<input id=${i}
-      type='text'
+      type="text"
       autocomplete="off"
-      maxlength='1'
-      onclick='openCalc(event)'
-      onkeydown='validateInput(event)'
+      maxlength="1"
+      onmouseover="drawGrid(event)"
+      onmouseout="drawGrid(event)"
+      onclick="openCalc(event)"
+      onkeydown="validateInput(event)"
       style='border-top:${i < 9 ? "1px solid black" : null};
       border-right:${(i + 1) % 3 === 0 ? "1px solid black" : null}; 
       border-bottom:${i >= 18 && i <= 26 || i >= 45 && i <= 53 || i >= 72 && i <= 80 ? "1px solid black" : null};
@@ -34,18 +38,18 @@ function createField() {
   }
 }
 
-createField()
+
 
 function openCalc(e) {
   document.querySelector('.calculator') && container.removeChild(document.querySelector('.calculator'))
-  const nums = document.createElement('div')
-  container.appendChild(nums)
-  nums.classList.add('calculator')
-  nums.style.top = e.y + 'px';
-  nums.style.left = e.x + 'px'
-  nums.innerHTML = ''
+  const calculator = document.createElement('div')
+  container.appendChild(calculator)
+  calculator.classList.add('calculator')
+  calculator.style.top = e.y + 'px';
+  calculator.style.left = e.x + 'px'
+  calculator.innerHTML = ''
   for (let i = 1; i < 10; i++) {
-    nums.innerHTML += `<p class='numbers' onclick='getCalcNumber(event, ${e.target.id})'>${i}</p>`
+    calculator.innerHTML += `<p class='numbers' onclick='getCalcNumber(event, ${e.target.id})'>${i}</p>`
   }
 }
 
@@ -76,17 +80,14 @@ function validateInput(evt) {
     evt.target.value ? evt.target.value = '' : null
     evt.target.setAttribute('class', 'yellow')
   }
-
 }
 
 function startGame() {
   btn.setAttribute('disabled', true);
   const arr = field.querySelectorAll('input')
   const board = [];
-  const display = [];
   for (let i = 0; i <= arr.length - 1; i += 9) {
     board.push([])
-    display.push([])
     for (let j = i; j < i + 9; j++) {
       arr[j].readOnly = true
       arr[j].removeAttribute('onkeydown')
@@ -96,17 +97,89 @@ function startGame() {
         board[board.length - 1].push(+arr[j].value)
         arr[j].style.border = '1px solid black'
       }
-      display[display.length - 1].push(arr[j])
     }
   }
-
   let result = sudoku(board)
+  const display = getBoard()
   displayResult(result, display)
 }
 
-let sudoku = function (board) {
-  const size = 9;
-  const boxSize = 3;
+
+function getBoard() {
+  const arr = field.querySelectorAll('input')
+  const display = [];
+  for (let i = 0; i <= arr.length - 1; i += 9) {
+    display.push([])
+    for (let j = i; j < i + 9; j++) {
+      display[display.length - 1].push(arr[j])
+    }
+  }
+  return display;
+}
+
+
+function displayResult(result, inp) {
+  for (let i = 0; i < 9; i++) {
+    for (let j = 0; j < 9; j++) {
+      inp[i][j].value = result[i][j]
+      inp[i][j].removeAttribute('onclick')
+      inp[i][j].removeAttribute('onkeydown')
+      inp[i][j].setAttribute('readonly', true)
+    }
+  }
+  btn.classList.add('display-none')
+  btn.innerHTML = 'Start!'
+  btn.removeAttribute('disabled')
+  reset.classList.remove('display-none')
+}
+
+function resetGame() {
+  field.innerHTML = ''
+  createField()
+  reset.classList.add('display-none')
+  btn.classList.remove('display-none')
+}
+createField()
+
+
+function drawGrid(e) {
+  const inputs = getBoard()
+  const checks = [];
+  const curPos = (board) => {
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        if (board[r][c] === e.target) {
+          return [r, c];
+        }
+      }
+    }
+    return null;
+  }
+  const [r, c] = curPos(inputs);
+  //Check rows
+  for (let i = 0; i < size; i++) {
+    inputs[i][c].classList.toggle('hovRowandCols');
+  }
+
+  //Check cols
+  for (let i = 0; i < size; i++) {
+    inputs[r][i].classList.toggle('hovRowandCols');
+  }
+
+  // Check box
+  const boxRow = Math.floor(r / boxSize) * boxSize;
+  const boxCol = Math.floor(c / boxSize) * boxSize;
+
+  for (let i = boxRow; i < boxRow + boxSize; i++) {
+    for (let j = boxCol; j < boxCol + boxSize; j++) {
+      inputs[i][j].classList.toggle('hovBoxes');
+    }
+  }
+}
+
+///////////////////////////////////////////////////////
+
+function sudoku(board) {
   const findEmpty = (board) => {
     for (let r = 0; r < size; r++) {
       for (let c = 0; c < size; c++) {
@@ -161,7 +234,7 @@ let sudoku = function (board) {
     for (let i = 1; i < size + 1; i++) {
       const currNum = i;
       const isValid = validate(currNum, currPos, board);
-      console.log('currPos ', currPos, 'currNum ', currNum, 'isValid ', isValid);
+      console.log('currPos ', currPos, 'currNum ', currNum, 'board ', board);
       if (isValid) {
         const [x, y] = currPos;
         board[x][y] = currNum;
@@ -183,24 +256,4 @@ let sudoku = function (board) {
 // console.table(puzzle)
 // console.table(sudoku(puzzle))
 
-function displayResult(result, inp) {
-  for (let i = 0; i < 9; i++) {
-    for (let j = 0; j < 9; j++) {
-      inp[i][j].value = result[i][j]
-      inp[i][j].removeAttribute('onclick')
-      inp[i][j].removeAttribute('onkeydown')
-      inp[i][j].setAttribute('readonly', true)
-    }
-  }
-  btn.classList.add('display-none')
-  btn.innerHTML = 'Start!'
-  btn.removeAttribute('disabled')
-  reset.classList.remove('display-none')
-}
 
-function resetGame() {
-  field.innerHTML = ''
-  createField()
-  reset.classList.add('display-none')
-  btn.classList.remove('display-none')
-}

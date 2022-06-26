@@ -34,10 +34,19 @@ input {
   text-shadow: 0 0 0 #333;
   background-color: #faf4f4;
   border: 1px solid rgb(199, 196, 196);
-  transition: background-color 0.2s ease-out;
 }
 
 input:hover {
+  background-color: rgb(190, 190, 190);
+}
+
+
+
+.hovRowandCols {
+  background-color: rgb(216, 216, 216);
+}
+
+.hovBoxes {
   background-color: rgb(216, 216, 216);
 }
 
